@@ -12,24 +12,32 @@ var Usuario = require('../models/usuario');
 // ==========================
 app.get('/', (req, res, next) => {
 
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
     Usuario.find({}, '_id nombre email img role')
-        .exec(
-            (err, usuarios) => {
+        .skip(desde)
+        .limit(5)
+        .exec((err, usuarios) => {
 
-                if (err) {
+            if (err) {
 
-                    return res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error cargando usuario',
-                        errors: err
-                    });
-                }
+                return res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando usuario',
+                    errors: err
+                });
+            }
+
+            Usuario.countDocuments({}, (err, conteo) => {
 
                 res.status(200).json({
                     ok: true,
-                    usuarios: usuarios
+                    usuarios: usuarios,
+                    total: conteo
                 });
             });
+        });
 });
 
 // ==========================
